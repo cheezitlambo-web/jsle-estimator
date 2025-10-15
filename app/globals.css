@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===============================
+   Brand tokens & base surface
+   =============================== */
+:root {
+  /* JS Land Escapes palette (adjust anytime) */
+  --brand-50:#eefcf5;
+  --brand-100:#d5f6e6;
+  --brand-200:#aeeccf;
+  --brand-300:#82ddb3;
+  --brand-400:#4fcf96;
+  --brand-500:#22c37e;  /* primary */
+  --brand-600:#16a56a;  /* hover */
+  --brand-700:#0e8656;  /* active */
+  --brand-800:#0a6b47;
+  --brand-900:#084f37;
+
+  --ink:#0a0a0a;
+  --muted:#6b7280;
+  --surface:#ffffff;
+
+  --radius: 0.75rem;
+  --ring: var(--brand-200);
+  --ring-strong: var(--brand-500);
+}
+
+html, body {
+  background: #f7f7f8;
+  color: var(--ink);
+}
+
+/* Improve default focus for native elements (our micro-UI mirrors this) */
+:where(input, select, textarea, button):focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+  border-color: var(--brand-500) !important;
+}
+
+/* Rounded feel for vanilla elements (micro-UI already uses rounded-xl) */
+:where(input, select, textarea) {
+  border-radius: var(--radius);
+}
+
+/* Selection color */
+::selection {
+  background: var(--brand-200);
+}
+
+/* Utility helpers (in case you use class-based visibility anywhere) */
+.print-hide { display: unset; }
+.print-only { display: none !important; }
+
+/* ===============================
+   Print / PDF styles
+   =============================== */
+@media print {
+  /* Hide interactive controls */
+  button,
+  input[type="checkbox"],
+  select,
+  textarea {
+    display: none !important;
+  }
+
+  /* Keep text inputs hidden, too (no form chrome in PDFs) */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input:not([type]) {
+    display: none !important;
+  }
+
+  /* Layout cleanup for print */
+  .border { border: none !important; }
+  .shadow-sm, .shadow, .shadow-md, .shadow-lg { box-shadow: none !important; }
+  main { padding: 0 !important; max-width: 100% !important; }
+  h1, h2 { margin-bottom: 8px !important; }
+
+  /* Visibility helpers */
+  .print-hide { display: none !important; }
+  .print-only { display: block !important; }
+
+  /* Make print headers easy to align if needed */
+  .print-only.flex { display: flex !important; }
+
+  /* Cap logo size on PDF/print (if you use a print-specific logo) */
+  img.print-logo {
+    max-height: 12px !important; /* tweak to taste */
+    width: auto !important;
+  }
+
+  /* Avoid weird page breaks inside sections */
+  section, .avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
