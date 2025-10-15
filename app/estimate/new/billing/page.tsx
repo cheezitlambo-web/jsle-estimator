@@ -11,8 +11,6 @@ export default function BillingPage() {
       <p style={{ color: "#4b5563", fontSize: 14 }}>
         Billing step placeholder. Monthly &amp; prepay options will go here.
       </p>
-
-      {/* plain anchors to avoid any import issues */}
       <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
         <a
           href="/estimate/new/services"
