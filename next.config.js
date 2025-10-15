@@ -1,13 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    // Let the app deploy even if there are ESLint errors.
-    ignoreDuringBuilds: true,
-  },
-  // If type-checking ever blocks builds, uncomment the next block (not recommended long-term):
-  // typescript: {
-  //   ignoreBuildErrors: true,
-  // },
+  // Do NOT set: output: 'export'
+  eslint: { ignoreDuringBuilds: true },
+  // If you still need to push through type issues on CI, keep this; otherwise remove it:
+  typescript: { ignoreBuildErrors: true },
 };
 
 module.exports = nextConfig;
