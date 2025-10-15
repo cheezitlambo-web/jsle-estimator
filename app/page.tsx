@@ -12,6 +12,9 @@ import Textarea from "@/components/ui/textarea";
 import Checkbox from "@/components/ui/checkbox";
 import Button from "@/components/ui/button";
 import { PrintOnly, ScreenOnly } from "@/components/ui/visibility";
+import InstallPrompt from "@/components/InstallPrompt";
+// ...
+<InstallPrompt />
 
 /** =========================
  * Types
