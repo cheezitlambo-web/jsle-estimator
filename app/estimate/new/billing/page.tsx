@@ -1,67 +1,28 @@
 // app/estimate/new/billing/page.tsx
 "use client";
+
+import Link from "next/link";
 import Section from "@/components/ui/section";
-import Field from "@/components/ui/field";
-import Input from "@/components/ui/input";
-import Checkbox from "@/components/ui/checkbox";
-import StepNav from "@/components/StepNav";
-import { useEstimate } from "@/app/(app)/estimate/EstimateProvider";
+import Button from "@/components/ui/button";
 
-export default function BillingStep() {
-  const { draft, setDraft } = useEstimate();
-
+export default function BillingPage() {
   return (
-    <Section title="Billing">
-      <div className="grid gap-3 text-sm">
-        <Checkbox
-          label="Pay monthly"
-          checked={!!draft.inputs.monthlyPayments}
-          onChange={(e) =>
-            setDraft((d) => ({
-              ...d,
-              inputs: { ...d.inputs, monthlyPayments: e.currentTarget.checked },
-            }))
-          }
-        />
-        <Field label="Contract months">
-          <Input
-            type="number"
-            className="w-28"
-            value={draft.inputs.months ?? 8}
-            onChange={(e) =>
-              setDraft((d) => ({
-                ...d,
-                inputs: { ...d.inputs, months: +e.target.value },
-              }))
-            }
-          />
-        </Field>
-        <Field label="Prepay discount %">
-          <Input
-            type="number"
-            className="w-28"
-            value={draft.inputs.prepayDiscPct ?? 0}
-            onChange={(e) =>
-              setDraft((d) => ({
-                ...d,
-                inputs: { ...d.inputs, prepayDiscPct: +e.target.value },
-              }))
-            }
-          />
-        </Field>
+    <main className="mx-auto w-full max-w-md p-4">
+      <Section title="Billing">
+        <p className="text-sm text-gray-600">
+          Billing step placeholder. A preview + monthly/prepay options will appear here.
+        </p>
 
-        {/* Phase 1: simple preview */}
-        <div className="mt-2 text-gray-700">
-          <div>Estimate #: <b>{draft.estimateNumber || "—"}</b></div>
-          <div>Customer: <b>{draft.customerName || "—"}</b></div>
-          <div>Address: <b>{draft.address || "—"}</b></div>
-          <div className="mt-2 text-xs text-gray-500">
-            (Totals preview will reflect service detail pages once we add them in Phase 2.)
-          </div>
+        <div className="mt-4 flex gap-2">
+          <Link href="/estimate/new/services">
+            <Button tone="outline">Back</Button>
+          </Link>
+          <div className="ml-auto" />
+          <Link href="/estimate/new/review">
+            <Button>Next</Button>
+          </Link>
         </div>
-
-        <StepNav backHref="/estimate/new/services" nextHref="/estimate/new/review" />
-      </div>
-    </Section>
+      </Section>
+    </main>
   );
 }
