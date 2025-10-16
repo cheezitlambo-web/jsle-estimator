@@ -1,26 +1,44 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+"use client";
+import { useEstimateStore, type ServiceItem } from "@/app/(app)/estimate/estimateStore";
+import StepNav from "@/components/StepNav";
+import { useState } from "react";
 
 export default function ServicesPage() {
+  const { services, upsertService, removeService } = useEstimateStore();
+  const [draft, setDraft] = useState<ServiceItem>({ id: crypto.randomUUID(), label: "", qty: 1, unitPrice: 0 });
+
+  const add = () => {
+    if (!draft.label) return;
+    upsertService(draft);
+    setDraft({ id: crypto.randomUUID(), label: "", qty: 1, unitPrice: 0 });
+  };
+
+  const canContinue = services.length > 0;
+
   return (
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: 16 }}>
-      <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>Services</h1>
-      <p style={{ color: "#4b5563", fontSize: 14 }}>Services step placeholder.</p>
-      <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-        <a
-          href="/estimate/new/customer"
-          style={{ border: "1px solid #d1d5db", padding: "8px 12px", borderRadius: 10 }}
-        >
-          Back
-        </a>
-        <div style={{ flex: 1 }} />
-        <a
-          href="/estimate/new/billing"
-          style={{ background: "#10b981", color: "white", padding: "8px 12px", borderRadius: 10 }}
-        >
-          Next
-        </a>
+    <div className="space-y-4">
+      <h1 className="text-xl font-semibold">Services</h1>
+
+      <div className="flex gap-2">
+        <input className="border p-2 rounded flex-1" placeholder="Label"
+          value={draft.label} onChange={(e) => setDraft({ ...draft, label: e.target.value })} />
+        <input className="border p-2 rounded w-24" type="number" min={1}
+          value={draft.qty} onChange={(e) => setDraft({ ...draft, qty: Number(e.target.value) })} />
+        <input className="border p-2 rounded w-32" type="number" step="0.01"
+          value={draft.unitPrice} onChange={(e) => setDraft({ ...draft, unitPrice: Number(e.target.value) })} />
+        <button className="px-4 py-2 rounded-xl border" onClick={add}>Add</button>
       </div>
-    </main>
+
+      <ul className="divide-y border rounded">
+        {services.map(s => (
+          <li key={s.id} className="flex items-center justify-between p-2">
+            <span>{s.label} ({s.qty} × ${s.unitPrice.toFixed(2)})</span>
+            <button className="text-sm underline" onClick={() => removeService(s.id)}>remove</button>
+          </li>
+        ))}
+      </ul>
+
+      <StepNav canContinue={canContinue} />
+    </div>
   );
 }

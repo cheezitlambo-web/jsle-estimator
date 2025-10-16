@@ -1,28 +1,33 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+"use client";
+import { useEstimateStore } from "@/app/(app)/estimate/estimateStore";
 
 export default function ReviewPage() {
+  const { customer, billing, services } = useEstimateStore();
+  const subtotal = services.reduce((s, i) => s + i.qty * i.unitPrice, 0);
+  const tax = (billing.taxRate ?? 0) * subtotal;
+  const total = subtotal + tax;
+
   return (
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: 16 }}>
-      <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>Review</h1>
-      <p style={{ color: "#4b5563", fontSize: 14 }}>
-        Review step placeholder (Save / PDF / Email will go here).
-      </p>
-      <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-        <a
-          href="/estimate/new/billing"
-          style={{ border: "1px solid #d1d5db", padding: "8px 12px", borderRadius: 10 }}
-        >
-          Back
-        </a>
-        <div style={{ flex: 1 }} />
-        <a
-          href="/"
-          style={{ background: "#10b981", color: "white", padding: "8px 12px", borderRadius: 10 }}
-        >
-          Done
-        </a>
-      </div>
-    </main>
+    <div className="space-y-4">
+      <h1 className="text-xl font-semibold">Review</h1>
+
+      <section className="border rounded p-4">
+        <h2 className="font-medium mb-2">Customer</h2>
+        <pre className="text-sm">{JSON.stringify(customer, null, 2)}</pre>
+      </section>
+
+      <section className="border rounded p-4">
+        <h2 className="font-medium mb-2">Billing</h2>
+        <pre className="text-sm">{JSON.stringify(billing, null, 2)}</pre>
+      </section>
+
+      <section className="border rounded p-4">
+        <h2 className="font-medium mb-2">Services</h2>
+        <pre className="text-sm">{JSON.stringify(services, null, 2)}</pre>
+        <div className="mt-2 text-sm">
+          Subtotal: ${subtotal.toFixed(2)} — Tax: ${tax.toFixed(2)} — <b>Total: ${total.toFixed(2)}</b>
+        </div>
+      </section>
+    </div>
   );
 }
