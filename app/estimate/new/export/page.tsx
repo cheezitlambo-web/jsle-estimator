@@ -6,7 +6,7 @@ import { buildLineItems, computeTotals, CURRENCY } from "@/app/(app)/estimate/se
 
 export default function ExportPage() {
   const router = useRouter();
-  const { customer, billing, details, selectedServices, settings } = useEstimateStore();
+  const { customer, billing, details, selectedServices, settings, saveEstimate } = useEstimateStore();
 
   const items = buildLineItems(details, settings);
   const totals = computeTotals(items, settings, {
@@ -48,6 +48,12 @@ export default function ExportPage() {
   };
 
   const printPDF = () => window.print();
+
+  const saveDraft = () => {
+    const d = saveEstimate();
+    alert(`Saved draft for ${customer.name || "customer"}.\nOpen via “Open Saved” on the home screen.`);
+    // optional: router.push("/estimate/open");
+  };
 
   return (
     <main className="mx-auto max-w-md p-4 pb-24 space-y-4">
@@ -114,6 +120,7 @@ export default function ExportPage() {
       </section>
 
       <div className="grid grid-cols-1 gap-2 print:hidden">
+        <button className="px-4 py-3 rounded-xl border" onClick={saveDraft}>💾 Save Draft</button>
         <button className="px-4 py-3 rounded-xl border" onClick={downloadCSV}>⬇️ Download CSV</button>
         <button className="px-4 py-3 rounded-xl border" onClick={printPDF}>🧾 Print / PDF</button>
         <button

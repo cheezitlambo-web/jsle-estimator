@@ -35,7 +35,16 @@ export type Estimate = {
   selectedServices: ServiceKey[];
   serviceStepIndex: number;
   details: ServiceDetails;
-  settings: Settings;             // NEW
+  settings: Settings;
+};
+
+export type Draft = {
+  id: string;
+  name?: string;          // e.g., Customer + address
+  address?: string;
+  estimateNumber?: string;
+  createdAt: string;      // ISO string
+  payload: Estimate;      // full snapshot
 };
 
 type Actions = {
@@ -51,7 +60,12 @@ type Actions = {
   setDetail: <K extends ServiceKey>(k: K, data: Partial<NonNullable<ServiceDetails[K]>>) => void;
   resetServiceStepper: () => void;
 
-  setSettings: (p: Partial<Settings>) => void; // NEW
+  setSettings: (p: Partial<Settings>) => void;
+
+  // Drafts
+  saveEstimate: () => Draft;                 // returns created draft
+  openEstimate: (id: string) => void;
+  deleteEstimate: (id: string) => void;
 };
 
 const initial: Estimate = {
@@ -70,13 +84,19 @@ const initial: Estimate = {
   },
 };
 
-export const useEstimateStore = create<Estimate & Actions>()(
+type Store = Estimate & {
+  drafts: Draft[];
+} & Actions;
+
+export const useEstimateStore = create<Store>()(
   persist(
     (set, get) => ({
       ...initial,
+      drafts: [],
 
+      // basics
       setCustomer: (p) => set((s) => ({ customer: { ...s.customer, ...p } })),
-      setBilling: (p) => set((s) => ({ billing: { ...s.billing, ...p } })),
+      setBilling:  (p) => set((s) => ({ billing:  { ...s.billing,  ...p } })),
       upsertService: (svc) =>
         set((s) => {
           const i = s.services.findIndex((x) => x.id === svc.id);
@@ -86,19 +106,56 @@ export const useEstimateStore = create<Estimate & Actions>()(
           return { services: next };
         }),
       removeService: (id) => set((s) => ({ services: s.services.filter((x) => x.id !== id) })),
-      reset: () => set(() => initial),
+      reset: () => set(() => ({ ...initial })),
 
+      // wizard
       setSelectedServices: (keys) => set(() => ({ selectedServices: keys, serviceStepIndex: 0 })),
       nextServiceStep: () => set((s) => ({ serviceStepIndex: Math.min(s.serviceStepIndex + 1, Math.max(0, s.selectedServices.length - 1)) })),
       prevServiceStep: () => set((s) => ({ serviceStepIndex: Math.max(0, s.serviceStepIndex - 1) })),
       resetServiceStepper: () => set(() => ({ serviceStepIndex: 0 })),
+      setDetail: (k, data) => set((s) => ({ details: { ...s.details, [k]: { ...(s.details as any)[k], ...data } } })),
 
-      setDetail: (k, data) =>
-        set((s) => ({
-          details: { ...s.details, [k]: { ...(s.details as any)[k], ...data } },
-        })),
-
+      // settings
       setSettings: (p) => set((s) => ({ settings: { ...s.settings, ...p } })),
+
+      // drafts
+      saveEstimate: () => {
+        const s = get();
+        const id = crypto.randomUUID();
+        const payload: Estimate = {
+          customer: s.customer,
+          billing: s.billing,
+          services: s.services,
+          selectedServices: s.selectedServices,
+          serviceStepIndex: s.serviceStepIndex,
+          details: s.details,
+          settings: s.settings,
+        };
+        const name = s.customer.name || "Unnamed";
+        const d: Draft = {
+          id,
+          name,
+          address: s.customer.address,
+          estimateNumber: undefined,
+          createdAt: new Date().toISOString(),
+          payload,
+        };
+        set((state) => ({ drafts: [d, ...state.drafts] }));
+        return d;
+      },
+
+      openEstimate: (id) => {
+        const d = get().drafts.find((x) => x.id === id);
+        if (!d) return;
+        const p = d.payload;
+        set(() => ({
+          ...p,
+        }));
+      },
+
+      deleteEstimate: (id) => {
+        set((s) => ({ drafts: s.drafts.filter((x) => x.id !== id) }));
+      },
     }),
     { name: "jsle-estimate", storage: createJSONStorage(() => localStorage) }
   )
