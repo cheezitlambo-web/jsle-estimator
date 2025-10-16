@@ -1,44 +1,55 @@
 "use client";
-import { useEstimateStore, type ServiceItem } from "@/app/(app)/estimate/estimateStore";
-import StepNav from "@/components/StepNav";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEstimateStore, type ServiceKey } from "@/app/(app)/estimate/estimateStore";
+import MobileStepNav from "@/components/MobileStepNav";
+import { serviceKeyLabel } from "@/app/(app)/estimate/steps";
+import { useMemo, useState } from "react";
 
-export default function ServicesPage() {
-  const { services, upsertService, removeService } = useEstimateStore();
-  const [draft, setDraft] = useState<ServiceItem>({ id: crypto.randomUUID(), label: "", qty: 1, unitPrice: 0 });
+const ALL: ServiceKey[] = ["mowing", "bed", "applications"];
 
-  const add = () => {
-    if (!draft.label) return;
-    upsertService(draft);
-    setDraft({ id: crypto.randomUUID(), label: "", qty: 1, unitPrice: 0 });
-  };
+export default function ServicesSelectPage() {
+  const router = useRouter();
+  const { selectedServices, setSelectedServices, resetServiceStepper } = useEstimateStore();
+  const [localSel, setLocalSel] = useState<ServiceKey[]>(selectedServices ?? []);
 
-  const canContinue = services.length > 0;
+  const toggle = (k: ServiceKey) =>
+    setLocalSel((arr) => (arr.includes(k) ? arr.filter((x) => x !== k) : [...arr, k]));
+
+  const canNext = localSel.length > 0;
+  const ordered = useMemo(() => localSel, [localSel]);
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">Services</h1>
+    <main className="mx-auto max-w-md p-4 pb-24 space-y-3">
+      <h1 className="text-xl font-semibold">Select Services</h1>
 
-      <div className="flex gap-2">
-        <input className="border p-2 rounded flex-1" placeholder="Label"
-          value={draft.label} onChange={(e) => setDraft({ ...draft, label: e.target.value })} />
-        <input className="border p-2 rounded w-24" type="number" min={1}
-          value={draft.qty} onChange={(e) => setDraft({ ...draft, qty: Number(e.target.value) })} />
-        <input className="border p-2 rounded w-32" type="number" step="0.01"
-          value={draft.unitPrice} onChange={(e) => setDraft({ ...draft, unitPrice: Number(e.target.value) })} />
-        <button className="px-4 py-2 rounded-xl border" onClick={add}>Add</button>
-      </div>
-
-      <ul className="divide-y border rounded">
-        {services.map(s => (
-          <li key={s.id} className="flex items-center justify-between p-2">
-            <span>{s.label} ({s.qty} × ${s.unitPrice.toFixed(2)})</span>
-            <button className="text-sm underline" onClick={() => removeService(s.id)}>remove</button>
+      <ul className="space-y-2">
+        {ALL.map((k) => (
+          <li key={k} className="flex items-center gap-3 border rounded-xl p-3">
+            <input
+              id={k}
+              type="checkbox"
+              className="h-5 w-5"
+              checked={localSel.includes(k)}
+              onChange={() => toggle(k)}
+            />
+            <label htmlFor={k} className="text-sm">{serviceKeyLabel[k]}</label>
           </li>
         ))}
       </ul>
 
-      <StepNav canContinue={canContinue} />
-    </div>
+      {ordered.length > 0 && (
+        <div className="text-xs text-gray-500">Order: {ordered.map((k) => serviceKeyLabel[k]).join(" → ")}</div>
+      )}
+
+      <MobileStepNav
+        onBack={() => router.push("/estimate/new/customers")}
+        onNext={() => {
+          setSelectedServices(ordered);
+          resetServiceStepper();
+          router.push("/estimate/new/details");
+        }}
+        canNext={canNext}
+      />
+    </main>
   );
 }
