@@ -1,28 +1,25 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+"use client";
+import { useEstimateStore } from "@/app/(app)/estimate/estimateStore";
+import StepNav from "@/components/StepNav";
 
 export default function BillingPage() {
+  const { billing, setBilling } = useEstimateStore();
+  const canContinue = billing.taxRate !== undefined;
+
   return (
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: 16 }}>
-      <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>Billing</h1>
-      <p style={{ color: "#4b5563", fontSize: 14 }}>
-        Billing step placeholder. Monthly &amp; prepay options will go here.
-      </p>
-      <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-        <a
-          href="/estimate/new/services"
-          style={{ border: "1px solid #d1d5db", padding: "8px 12px", borderRadius: 10 }}
-        >
-          Back
-        </a>
-        <div style={{ flex: 1 }} />
-        <a
-          href="/estimate/new/review"
-          style={{ background: "#10b981", color: "white", padding: "8px 12px", borderRadius: 10 }}
-        >
-          Next
-        </a>
-      </div>
-    </main>
+    <div className="space-y-4">
+      <h1 className="text-xl font-semibold">Billing</h1>
+      <input className="border p-2 rounded w-full" type="number" step="0.01"
+        placeholder="Tax rate (e.g. 0.0925)"
+        value={billing.taxRate ?? 0}
+        onChange={(e) => setBilling({ taxRate: Number(e.target.value) })}
+      />
+      <textarea className="border p-2 rounded w-full"
+        placeholder="Payment terms"
+        value={billing.terms || ""}
+        onChange={(e) => setBilling({ terms: e.target.value })}
+      />
+      <StepNav canContinue={canContinue} />
+    </div>
   );
 }
